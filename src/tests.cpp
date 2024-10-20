@@ -1,4 +1,6 @@
 #include "tests.h"
+#include<iostream>
+using namespace std;
 
 // 练习1，实现库函数strlen
 int my_strlen(char *str) {
@@ -7,7 +9,11 @@ int my_strlen(char *str) {
      */
 
     // IMPLEMENT YOUR CODE HERE
-    return 0;
+    int i=0;
+    while(*(str+i)!='\0'){
+        i++;
+    }
+    return i;
 }
 
 
@@ -19,6 +25,16 @@ void my_strcat(char *str_1, char *str_2) {
      */
 
     // IMPLEMENT YOUR CODE HERE
+    while(*str_1!='\0'){
+        str_1++;
+    }
+    while(*str_2!='\0'){
+        *str_1=*str_2;
+        str_2++;
+        str_1++;
+    }
+    *str_1='\0';
+
 }
 
 
@@ -31,6 +47,23 @@ char* my_strstr(char *s, char *p) {
      */
 
     // IMPLEMENT YOUR CODE HERE
+    char *d=0;
+    char *a=0;
+    a=p;
+    while(*s!='\0'&&*p!='\0'){         
+        if(*s==*p){
+                s++;
+                p++;
+                if(d==0){
+                    d=s;
+                }
+            }
+            else{
+                d=0;
+                s++;
+                p=a;
+            }
+    }
     return 0;
 }
 
@@ -96,6 +129,15 @@ void rgb2gray(float *in, float *out, int h, int w) {
      */
 
     // IMPLEMENT YOUR CODE HERE
+    for(int i=0;i<h;i++){
+        for(int j=0;j<w;j++){
+            int m=i*w+j;
+            int n=m*3;
+            float g=(*(in+n))*0.2989+(*(in+n+1))*0.5870+(*(in+n+2))*0.1140;
+            out[m]=g;
+            
+        }
+    }
     // ...
 }
 
@@ -196,8 +238,36 @@ void resize(float *in, float *out, int h, int w, int c, float scale) {
      *        所以需要对其进行边界检查
      */
 
-    int new_h = h * scale, new_w = w * scale;
+    int new_h = h *scale, new_w = w * scale;
     // IMPLEMENT YOUR CODE HERE
+    for(int i=0;i<new_h;i++){
+        for(int j=0;j<new_w;j++){
+            float x0=i/scale;
+            float y0=j/scale;
+            int x1 = static_cast<int>(x0);
+            int y1 = static_cast<int>(y0);
+            int x2=x1+1;
+            int y2=y1+1;
+            if(x2>=w){
+                x2=x1;
+            }
+            if(y2>=h){
+                y2=y1;
+            }
+            float dx=x0-x1;
+            float dy=y0-y1;
+            for(int l=0;l<c;l++){
+                float p1=in[(x1+y2*w)*c+l];
+                float p2=in[(x2+y2*w)*c+l];
+                float p3=in[(x1+y1*w)*c+l];
+                float p4=in[(x2+y1*w)*c+l];
+                float q=p1 * (1 - dx)*(1 - dy) + p2 * dx*(1 - dy)+ p3 * (1 - dx)*dy + p4 * dx*dy;
+                int index=(i*new_w+j)*c+l;
+                out[index]=q;
+            }
+
+        }
+    }
 
 }
 
@@ -221,4 +291,27 @@ void hist_eq(float *in, int h, int w) {
      */
 
     // IMPLEMENT YOUR CODE HERE
+   int list[256]={0};
+   float picture[256]={0.0f};
+   for(int i=0;i<h;i++){
+    for(int j=0;j<w;j++){
+        int g=static_cast<int>(in[i * w + j]);
+        list[g]++;
+    }
+   }
+    float sum = 0.0f;
+    for (int i = 0; i < 256; ++i) {
+        sum += list[i];
+        picture[i] = sum / (float)(h * w);
+    }
+
+    // 映射原图像的像素值
+    for (int i = 0; i < h; ++i) {
+        for (int j = 0; j < w; ++j) {
+            int g = static_cast<int>(in[i * w + j]);
+            int newg = static_cast<int>(picture[g] * 255.0f);
+            in[i * w + j] = newg;
+        }
+    }
+
 }
